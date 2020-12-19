@@ -22,9 +22,10 @@ def relevant_translation( L ):
     K=P.parent()
     i = 0
     while P(i) == 0:
-        i+=1
+        i=i+1
     if i != 0:
         for P in L:
+            print(K([i,1]))
             L1.append( P( K( [i,1] ) ) )
         return(L1,i)
     else:
@@ -327,39 +328,47 @@ def reverse_iso( P, p, borne ):
 
 def p_curvatures( L, N ):
     r""" 
-    INPUT: L a differential operator with coefficients in ZZ[Y],
-    (represented by the list of its coefficients), N an integer.
+    INPUT: L a differential operator over the ring of polynomials over the
+    integer ring, with d/dx for derivation (the variable needs not be x), N
+    an integer.
     OUTPUT: A list of the characteristic polynomials of the p-curvatures of
     L for almost all p primes less than N, the almost being decided by the
     degree of the coefficients and the constant of the leading coefficient.
 
     EXAMPLES:
         sage: ZZY.<Y>=ZZ[]
-        sage: L=[-Y^2 + 2*Y - 4, -Y^2 - 21*Y + 3, -2*Y^2 + Y + 1, -4*Y^2 - Y - 1]
+        sage: K.<D>=ZZY['D',ZZY.derivation()]
+        sage: L=K([-Y^2 + 2*Y - 4, -Y^2 - 21*Y + 3, -2*Y^2 + Y + 1, -4*Y^2
+        - Y - 1])
         sage: p_curvatures(L,14)
-        [(x^3 + 2*x^2 + ((Y + 1)/(Y + 2))*x + (Y^2 + 1)/(Y^2 + Y + 1), 3),
-         (x^3 + ((3*Y^2 + 2*Y + 3)/(Y^2 + 4*Y + 4))*x^2 + ((4*Y^2 +
-         4*Y)/(Y^2 + 4*Y + 4))*x + (4*Y^2 + 2*Y + 2)/(Y^2 + 4*Y + 4),
+        [(X^3 + 2*X^2 + ((Y + 1)/(Y + 2))*X + (Y^2 + 1)/(Y^2 + Y + 1), 3),
+         (X^3 + ((3*Y^2 + 2*Y + 3)/(Y^2 + 4*Y + 4))*X^2 + ((4*Y^2 +
+         4*Y)/(Y^2 + 4*Y + 4))*X + (4*Y^2 + 2*Y + 2)/(Y^2 + 4*Y + 4),
          5),
-         (x^3 + 4*x^2 + ((2*Y^2 + Y + 3)/(Y^2 + 2*Y + 2))*x + (2*Y^2 +
+         (X^3 + 4*X^2 + ((2*Y^2 + Y + 3)/(Y^2 + 2*Y + 2))*X + (2*Y^2 +
          4*Y)/(Y^2 + 2*Y + 2),
          7),
-         (x^3 + ((6*Y^2 + 7*Y + 6)/(Y^2 + 3*Y + 3))*x^2 + ((3*Y^2 +
-         4)/(Y^2 + 3*Y + 3))*x + (3*Y^2 + 9*Y + 10)/(Y^2 + 3*Y + 3),
+         (X^3 + ((6*Y^2 + 7*Y + 6)/(Y^2 + 3*Y + 3))*X^2 + ((3*Y^2 +
+         4)/(Y^2 + 3*Y + 3))*X + (3*Y^2 + 9*Y + 10)/(Y^2 + 3*Y + 3),
          11),
-         (x^3 + ((7*Y^2 + 5*Y + 8)/(Y^2 + 10*Y + 10))*x^2 +
-         ((10*Y^2 + 12*Y + 12)/(Y^2 + 10*Y + 10))*x + (10*Y^2 +
+         (X^3 + ((7*Y^2 + 5*Y + 8)/(Y^2 + 10*Y + 10))*X^2 +
+         ((10*Y^2 + 12*Y + 12)/(Y^2 + 10*Y + 10))*X + (10*Y^2 +
          12)/(Y^2 + 10*Y + 10),
          13)]
     """
-    L2, trans_reminder = relevant_translation( L )
-    d = max( P.degree( ) for P in L2 )
+    K=L.parent()
+    BR=K.base_ring()
+    variable=BR.variable_name()
+    ZZY=ZZ[variable]
+    if BR != ZZY and K.twisting_derivation() != ZZY.derivation():
+        raise NotImplementedError
+    coefficients_list=L.list()
+    L2, trans_reminder = relevant_translation( coefficients_list )
+    d = max( P.degree() for P in L2 )
     L1, denom = isomorphism( L2, d )
-    ZZY.< Y > = ZZ[ ]
     m = len( L1 )
     coeff = L1[ -1 ]
     M = build_matrix( L1, m )
-    M = M.change_ring( ZZY )
     primes_list = list( primes( N ) )
     while primes_list[0] <= d:
         del( primes_list[ 0 ] )
@@ -372,7 +381,8 @@ def p_curvatures( L, N ):
         else:
             i += 1
     N = primes_list[ -1 ] + 1
-    ZQY.< Y > = PowerSeriesRing( ZZ, default_prec = d + 1 )
+    ZQY.<Y> = PowerSeriesRing( ZZ, default_prec = d + 1 )
+    M=M.change_ring(ZQY)
     matrix_list =[ M( Y+a ) + O( Y^( d+1 ) ) for a in range( N ) ]
     factorial_list = harvey_factorial( N, matrix_list, primes_list )
     factorial_list = [ (B[0]/GF(B[1])(coeff), B[1]) for B in  factorial_list]
@@ -383,15 +393,18 @@ def p_curvatures( L, N ):
     leading_coeff = L[-1]
     for P in Xi_x_list:
         p=P[1]
-        FpY.<Y> = GF(p)[ ]
+        FpY = GF(p)[variable ]
         leading_coeff_p=FpY(leading_coeff)
         l=[]
         for i in range(len(P[0])):
             pre_trans = FpY(P[0][i])
             if trans_reminder != 0:
-                pre_trans=pre_trans(Y-GF(p)(trans_reminder))
+                pre_trans=pre_trans(FpY([-trans_reminder,1]))
             l.append(pre_trans)
-        FpYx.<x>=FpY[ ]
+        if variable != 'x' and variable != 'X':
+            FpYx.<X>=FpY[ ]
+        else:
+            FpYx.<Y>=FpY[ ]
         l=FpYx(l[ denom : ])
         charpoly_list.append((l/leading_coeff_p,p))
     return(charpoly_list)
@@ -399,6 +412,7 @@ def p_curvatures( L, N ):
 def randomize( d, m ):
     ZZY.< Y > = ZZ[ ]
     L=[ZZY.random_element(d) for i in range(m+1)]
-    return(L)
+    K.<D>=ZZY['D',ZZY.derivation()]
+    return(K(L))
 
 
