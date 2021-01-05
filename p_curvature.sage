@@ -25,7 +25,6 @@ def relevant_translation( L ):
         i=i+1
     if i != 0:
         for P in L:
-            print(K([i,1]))
             L1.append( P( K( [i,1] ) ) )
         return(L1,i)
     else:
@@ -126,7 +125,7 @@ def isomorphism(L,d):
         aj=l[0]+K([0,1])*change_basis(l[1:],bases,K)
         L1.append(aj)
     puiss=d
-    while L1[0]==0:
+    while L1[0]==0 and puiss>0:
         L1.pop(0)
         puiss+=-1
     while L1[-1]==0:
