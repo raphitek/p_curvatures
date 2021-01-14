@@ -4,7 +4,7 @@ In this project we provide the source code of the implementation in Sage of an a
 
 Files description and instructions : 
 - p_curvature.sage is the main program
-- p_curvature_steps.sage is an alternative version of this program that let
+- p_curvature_verbose.sage is an alternative version of this program that let
   the user see the progression of the algorithm if he so wishes. It helps
   killing time when running on big operators, though it slows the execution
   a bit.
@@ -12,7 +12,7 @@ Files description and instructions :
   operator. As of yet I have not been able to run it to the end. Execute
   with the following instructions.
   """
-    sage : %runfile p_curvature_steps.sage
+    sage : %runfile p_curvature_verbose.sage
     sage : %runfile test_3D_diagonal_queens_path.sage
   """
 - test_creative_telescoping.sage is a test file on operators of a certain
@@ -22,7 +22,7 @@ Files description and instructions :
   https://specfun.inria.fr/bostan/publications/BoChHoKaPe17.pdf . 
   Run with the following lines :
   """
-    sage : %runfile p_curvature_steps.sage
+    sage : %runfile p_curvature_verbose.sage
     sage : %runfile test_creative_telescoping.sage
   """
 - test_p_curvetaure.sage is a test on two other operators linked with the

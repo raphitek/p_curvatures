@@ -2,7 +2,10 @@
 ZZx.<x>=ZZ[]
 K.<Dx>=ZZx['Dx',ZZx.derivation()]
 
+
 L1=(11337408000000000*x^8-11250*x^7)*Dx^8+(362797056000000000*x^7-275625*x^6)*Dx^7+(4043927462400000000*x^6-2223250*x^5)*Dx^6+(19459527091200000000*x^5-7118750*x^4)*Dx^5+(40810981455014400000*x^4-8665432*x^3)*Dx^4+(33378063480115200000*x^3-3181944*x^2)*Dx^3+(7972406431637760000*x^2-181392*x)*Dx^2+(251637206929920000*x-48)*Dx+3726543300480
+
+print('Test on the operator making the generation function of Gessel vanish for p<=200')
 
 l1=p_curvatures(L1,200)
 for i in l1:
@@ -17,6 +20,9 @@ ZZt.<t>=ZZ[]
 Kt_1.<Dt>=ZZt['Dt',ZZt.derivation()]
 
 L2_1=Kt_1(L2_1)
+
+print('Test on the operator making the generating function of Kreweras  vanish for x=1 and p<=200')
+
 l2=p_curvatures(L2_1,200)
 for i in l2:
     print(i)
