@@ -29,7 +29,12 @@ Files description and instructions :
   Kreweras and Gessel walks. Run with the following lines
   """
     sage : %runfile p_curvature.sage
-    sage : %runfile test_p_curvetaure.sage
+    sage : %runfile test_p_curveture.sage
+  """
+- p_curvatures_single.sage is an implementation of [BSC14] algorithm. It
+  only contains functions. Run with the following lines
+  """
+    sage : %runfile p_curvature_single.sage
   """
 - explications_detaillées(fr).pdf is the memoire which explains how the
   algorithm works. It is in french, and a little outdated on specific
