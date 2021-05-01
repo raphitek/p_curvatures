@@ -324,6 +324,12 @@ def reverse_iso( P, p, borne ):
             coeff = -1*coeff
     return(l)
 
+def translate_format(M,N,d):
+    MM=M.parent()
+    R=M.base_ring()
+    L=[MM([P(R([a,1])).add_bigoh(d+1) for P in M.list()]) for a in range(N)]
+    return(L)
+
 
 def p_curvatures( L, N ):
     r""" 
@@ -382,7 +388,7 @@ def p_curvatures( L, N ):
     N = primes_list[ -1 ] + 1
     ZQY.<Y> = PowerSeriesRing( ZZ, default_prec = d + 1 )
     M=M.change_ring(ZQY)
-    matrix_list =[ M( Y+a ) + O( Y^( d+1 ) ) for a in range( N ) ]
+    matrix_list =translate_format(M,N,d)
     factorial_list = harvey_factorial( N, matrix_list, primes_list )
     factorial_list = [ (B[0]/GF(B[1])(coeff), B[1]) for B in  factorial_list]
     Xi_theta_list  = [ (GF(B[1])(coeff)*B[0].charpoly(), B[1]) for B in

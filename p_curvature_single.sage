@@ -180,7 +180,7 @@ def solo_compute_factorial( M, p, d):
     Bp=M
     for i in range(1, rp):
         trans=M(K([i,1])).change_ring(Ky)+matrix([[O(Y^(d+1)) for i in range(M.dimensions()[1])] for j in range(M.dimensions()[0])])
-        Bp=Bp*M(K([i,1]))
+        Bp=Bp*trans
     Bpp=Bp.change_ring(K)
     for i in range(1,rp):
         Bp=Bp*Bpp(K([i*rp,1]))
@@ -249,7 +249,7 @@ def solo_p_curvature(L,p):
     d = max( P.degree() for P in L2 )
     L1, denom = solo_isomorphism( L2, d )
     m = len( L1 )
-    coeff = L1[ -1 ]
+    coeff = GF(p)(L1[ -1 ])
     M = solo_build_matrix( L1, m, p )
     Bp = solo_compute_factorial( M, p, d )
     Bp=Bp/coeff

@@ -283,14 +283,16 @@ def harvey_factorial( N, L, p_list, steps=False):
         print('    Filling tree S')
 
     _ = compute_tree( S, Sd, 0, 0, d )
-
+    
     if steps:
-        print('    Filling tree A')
+        print('    Reducing input')
     Zn=IntegerModRing(S[0][0])
     ZnY.<Y>=Zn[[]]
     for i in Ad:
         if i!=1:
             i.change_ring(ZnY)
+    if steps:
+        print('    Filling tree A')
     _ = compute_tree( A, Ad, 0, 0, d, steps )
 
     W = [ [ 1 for j in range(2^i) ] for i in range(d+1) ]
@@ -300,8 +302,12 @@ def harvey_factorial( N, L, p_list, steps=False):
 
     fill_tree( W, 0, 0, d, A, S, steps )
     l = [ ]
+    if steps:
+        print('    Formating output')
     for i in range(n):
         if Sd[i]!=1:
+            if steps:
+                print('        Formating output '+str(i)+' out of '+str(n))
             GFY.<Y>=PowerSeriesRing(GF(Sd[i]))
             l.append( ( ( L[0] * W[d][i] ).change_ring( GFY ), Sd[i] ) )
     return(l)
@@ -430,10 +436,11 @@ def p_curvatures( L, N, steps=False ):
     if steps:
         print('Computing translations of the companion matrix')
     matrix_list=[]    
+
     for a in range(N):
         if steps:
             print('    Computing translation by '+str(a)+' of companion matrix out of '+str(N) )
-        matrix_list.append( M(Y+a)+O(Y^( d+1 ) ) )
+        matrix_list.append( M.parent()([P(Y+a).add_bigoh(d+1) for P in M.list()]))
 
     if steps:
         print('Computing matrix factorials')
@@ -447,9 +454,11 @@ def p_curvatures( L, N, steps=False ):
 
     if steps:
         print( 'Computing characteristic polynomials')
-
-    Xi_theta_list  = [ (GF(B[1])(coeff)*B[0].charpoly(), B[1]) for B in
-            factorial_list]
+    Xi_theta_list = []
+    for B in factorial_list:
+        if steps:
+            print('    Computing characteristic polynomials for p='+str(B[1])+' less than '+str(N))
+        Xi_theta_list.append((GF(B[1])(coeff)*B[0].charpoly(), B[1]))
     
     if steps:
         print('Computing reverse isomorphisms')
@@ -459,14 +468,14 @@ def p_curvatures( L, N, steps=False ):
     leading_coeff = L[-1]
     for P in Xi_x_list:
         p=P[1]
+        if steps and trans_reminder!=0:
+            print('    Translating back for p='+str(p))
         FpY = GF(p)[variable ]
         leading_coeff_p=FpY(leading_coeff)
         l=[]
         for i in range(len(P[0])):
             pre_trans = FpY(P[0][i])
             if trans_reminder != 0:
-                if steps:
-                    print('Translating back')
                 pre_trans=pre_trans(FpY([-trans_reminder,1]))
             l.append(pre_trans)
         if variable != 'x' and variable != 'X':
