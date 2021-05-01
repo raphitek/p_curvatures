@@ -173,17 +173,53 @@ def solo_build_matrix(L,m, p):
         M.append(ligne)
     return(matrix(M))
 
+def solo_prod(L):
+    l=len(L)
+    if l==0:
+        return(1)
+    if l==1:
+        return(L[0])
+    L1=L[:l//2]
+    L2=L[l//2:]
+    return(solo_prod(L1)*solo_prod(L2))
+
 def solo_compute_factorial( M, p, d):
     K=M[0,0].parent()
     Ky.<Y>=K.base_ring()[[]]
     rp=int(sqrt(p))
-    Bp=M
-    for i in range(1, rp):
-        trans=M(K([i,1])).change_ring(Ky)+matrix([[O(Y^(d+1)) for i in range(M.dimensions()[1])] for j in range(M.dimensions()[0])])
-        Bp=Bp*trans
-    Bpp=Bp.change_ring(K)
-    for i in range(1,rp):
-        Bp=Bp*Bpp(K([i*rp,1]))
+    L=[M(K([i,1])) for i in range(rp)]
+    Bp=solo_prod(L)
+    eta=0
+    n=1
+    while n<rp:
+        eta+=1
+        n=n*2
+    Prod_tree=[[1 for j in range(2^i)] for i in range(eta+1)]
+    k=0
+    j=0
+    while j<=2^eta-1:
+        if k*2^eta<=(j*rp):
+            Prod_tree[eta][j]=K([-rp*k,1])^(d+1)
+            k+=1
+        j+=1
+    for i in range(1,eta+1):
+        for j in range(2^(eta-i)):
+            Prod_tree[eta-i][j]=Prod_tree[eta-i+1][2*j]*Prod_tree[eta-i+1][2*j+1]
+    res_tree=[[1 for j in range(2^i)] for i in range(eta+1)]
+    res_tree[0][0]=Bp%Prod_tree[0][0]
+    for i in range(1,eta+1):
+        for j in range(2^i):
+            res_tree[i][j]=res_tree[i-1][j//2]%Prod_tree[i][j]
+    j=0
+    liste_bpp=[]
+    for i in range(2^eta):
+        if Prod_tree[eta][i]!=1:
+            liste_bpp.append(((res_tree[eta][i])(K([j*rp,1]))).change_ring(Ky))
+            j+=1
+    MgrO=matrix([[O(Y^(d+1)) for i in range(M.dimensions()[1])] for j in range(M.dimensions()[0])])
+    liste_bpp=[B+MgrO for B in liste_bpp]
+    lqdsf=[K([-i*rp,1])^(d+1) for i in range(rp)]
+    Bp=solo_prod(liste_bpp)
     for i in range(rp*rp,p):
         Bp=Bp*M(K([i,1]))
     return(Bp)
@@ -253,6 +289,7 @@ def solo_p_curvature(L,p):
     M = solo_build_matrix( L1, m, p )
     Bp = solo_compute_factorial( M, p, d )
     Bp=Bp/coeff
+    print(Bp)
     xi_theta=coeff*Bp.charpoly()
     FpY=GF(p)[variable]
     xi_theta=xi_theta.change_ring(FpY)
